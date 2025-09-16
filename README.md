@@ -24,6 +24,22 @@
 
 Build scalable games and apps with a production ready server used by ambitious game studios and app developers [all around the world](https://heroiclabs.com/customers/). Have a look at the [documentation](https://heroiclabs.com/docs) and join the [developer community](https://forum.heroiclabs.com) for more info.
 
+## Architecture Documentation
+
+For detailed technical architecture documentation with comprehensive Mermaid diagrams, see:
+
+📖 **[Technical Architecture Documentation](docs/README.md)**
+
+The architecture documentation covers:
+- [System Architecture Overview](docs/architecture/README.md) - High-level design and components
+- [Component Architecture](docs/architecture/components.md) - Detailed component breakdown  
+- [Database Architecture](docs/architecture/database.md) - Data modeling and storage patterns
+- [Authentication & Authorization](docs/architecture/auth.md) - Security architecture
+- [Real-time Communication](docs/architecture/realtime.md) - WebSocket and real-time features
+- [Runtime Extensions](docs/architecture/runtime.md) - Custom server-side logic
+- [Deployment Architecture](docs/architecture/deployment.md) - Production deployment patterns
+- [API Architecture](docs/architecture/api.md) - Protocol design and endpoints
+
 ## Getting Started
 
 The server is simple to setup and run for local development and can be deployed to any cloud provider. See the [deployment notes](#deployment) for recommendations on how to deploy the project for production. Nakama server requires CockroachDB or another Postgres wire-compatible server as it's database.
