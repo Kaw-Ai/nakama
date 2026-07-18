@@ -16,6 +16,9 @@
 
 FROM golang:1.22.5-bookworm AS builder
 
+ARG commit=local
+ARG version=local
+
 ENV GOOS linux
 ENV CGO_ENABLED 1
 
@@ -27,7 +30,7 @@ WORKDIR /go/build/nakama
 
 COPY . .
 
-RUN go build -o /go/build-out/nakama -trimpath -mod=vendor -gcflags "-trimpath $PWD" -asmflags "-trimpath $PWD" -ldflags "-s -w -X main.version=local"
+RUN go build -o /go/build-out/nakama -trimpath -mod=vendor -gcflags "-trimpath $PWD" -asmflags "-trimpath $PWD" -ldflags "-s -w -X main.version=$version -X main.commitID=$commit"
 
 FROM debian:bookworm-slim
 
