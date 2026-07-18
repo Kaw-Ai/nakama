@@ -1,0 +1,44 @@
+# Pre-deploy database migration job. Run this to completion before rolling
+# out a new server version:
+#   kubectl apply -f migration-job.yaml
+#   kubectl wait --for=condition=complete job/nakama-migrate --timeout=300s
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: nakama-migrate
+  labels:
+    app: nakama
+    component: migration
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 86400
+  template:
+    metadata:
+      labels:
+        app: nakama
+        component: migration
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          image: ghcr.io/kaw-ai/nakama:latest # Pin to the exact release tag being deployed.
+          command:
+            - /nakama/nakama
+          args:
+            - migrate
+            - up
+            - --database.address
+            - $(DATABASE_ADDRESS)
+          env:
+            - name: DATABASE_ADDRESS
+              valueFrom:
+                secretKeyRef:
+                  name: nakama-secrets
+                  key: database-address
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi

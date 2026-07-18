@@ -1,0 +1,36 @@
+# Client API service — front this with a load balancer / ingress that
+# terminates TLS for ports 7349 (gRPC) and 7350 (HTTP/WebSocket).
+apiVersion: v1
+kind: Service
+metadata:
+  name: nakama
+  labels:
+    app: nakama
+spec:
+  type: ClusterIP
+  selector:
+    app: nakama
+  ports:
+    - name: grpc
+      port: 7349
+      targetPort: grpc
+    - name: api
+      port: 7350
+      targetPort: api
+---
+# Console service — keep internal only. Expose via VPN or an IP-allowlisted
+# ingress; never publish port 7351 to the public internet.
+apiVersion: v1
+kind: Service
+metadata:
+  name: nakama-console
+  labels:
+    app: nakama
+spec:
+  type: ClusterIP
+  selector:
+    app: nakama
+  ports:
+    - name: console
+      port: 7351
+      targetPort: console
