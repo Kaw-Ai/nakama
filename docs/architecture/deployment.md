@@ -829,3 +829,28 @@ For more information on related topics:
 - [Component Architecture](components.md) - Deployment component details
 - [Database Architecture](database.md) - Database deployment patterns
 - [Authentication & Authorization](auth.md) - Security deployment considerations
+
+## Fork-Specific Deployment Assets
+
+This repository ships concrete deployment assets that implement the patterns
+described above:
+
+- **Release pipeline**: [`.github/workflows/release.yml`](../../.github/workflows/release.yml)
+  builds multi-arch (linux/amd64, linux/arm64) container images stamped with
+  version and commit metadata, and publishes them to GHCR as
+  `ghcr.io/kaw-ai/nakama`.
+- **Security gates**: [`.github/workflows/security.yml`](../../.github/workflows/security.yml)
+  runs govulncheck and Trivy dependency scanning.
+- **Per-environment configuration**: [`deploy/config/`](../../deploy/config/)
+  contains dev, staging, and production configuration templates with
+  secret-injection guidance.
+- **Kubernetes manifests**: [`deploy/kubernetes/`](../../deploy/kubernetes/)
+  provides a pre-deploy migration job, the server deployment with readiness/
+  liveness probes and connection-drain settings, and internal/external
+  services.
+- **Runbooks**: [`docs/operations/runbooks.md`](../operations/runbooks.md)
+  documents restart, deploy, rollback, config change, scaling, and backup
+  procedures, plus monitoring and alerting guidance.
+
+See [`deploy/README.md`](../../deploy/README.md) for the full deployment guide,
+including database strategy, runtime module packaging, and network topology.
