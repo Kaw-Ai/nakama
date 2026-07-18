@@ -1,0 +1,12 @@
+# Kustomize entrypoint for the Nakama deployment.
+# Usage: kubectl apply -k deploy/kubernetes
+# Run the migration job to completion before rolling out the deployment.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: nakama
+resources:
+  - configmap.yaml
+  - secret.yaml
+  - migration-job.yaml
+  - deployment.yaml
+  - service.yaml

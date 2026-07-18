@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nakama-config
+  labels:
+    app: nakama
+data:
+  # Replace with the contents of deploy/config/staging.yml or production.yml
+  # for the target environment. Secrets are supplied via the nakama-secrets
+  # Secret and CLI flag overrides in the deployment manifest.
+  nakama.yml: |
+    name: nakama-prod
+    data_dir: /nakama/data
+    shutdown_grace_sec: 60
+    logger:
+      level: INFO
+      stdout: true
+      format: JSON
+    metrics:
+      reporting_freq_sec: 60
+      prometheus_port: 9100
+    session:
+      token_expiry_sec: 7200
+      refresh_token_expiry_sec: 86400
+    socket:
+      port: 7350
+      max_message_size_bytes: 4096
+    console:
+      port: 7351
+      username: admin
+      token_expiry_sec: 43200
+    runtime:
+      path: /nakama/data/modules

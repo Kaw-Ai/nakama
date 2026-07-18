@@ -1,0 +1,114 @@
+# Nakama server deployment.
+# NOTE: OSS Nakama is single-node (clustering is an enterprise feature).
+# Keep replicas at 1 and scale vertically unless workloads are partitioned.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nakama
+  labels:
+    app: nakama
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: nakama
+  template:
+    metadata:
+      labels:
+        app: nakama
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9100"
+    spec:
+      # Give in-flight realtime sockets time to drain on rollout; must be
+      # >= shutdown_grace_sec in the Nakama config.
+      terminationGracePeriodSeconds: 90
+      containers:
+        - name: nakama
+          image: ghcr.io/kaw-ai/nakama:latest # Pin to the exact release tag being deployed.
+          args:
+            - --config
+            - /nakama/config/nakama.yml
+            - --database.address
+            - $(DATABASE_ADDRESS)
+            - --session.encryption_key
+            - $(SESSION_ENCRYPTION_KEY)
+            - --session.refresh_encryption_key
+            - $(SESSION_REFRESH_ENCRYPTION_KEY)
+            - --console.password
+            - $(CONSOLE_PASSWORD)
+            - --console.signing_key
+            - $(CONSOLE_SIGNING_KEY)
+          env:
+            - name: DATABASE_ADDRESS
+              valueFrom:
+                secretKeyRef:
+                  name: nakama-secrets
+                  key: database-address
+            - name: SESSION_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: nakama-secrets
+                  key: session-encryption-key
+            - name: SESSION_REFRESH_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: nakama-secrets
+                  key: session-refresh-encryption-key
+            - name: CONSOLE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nakama-secrets
+                  key: console-password
+            - name: CONSOLE_SIGNING_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: nakama-secrets
+                  key: console-signing-key
+          ports:
+            - name: grpc
+              containerPort: 7349
+            - name: api
+              containerPort: 7350
+            - name: console
+              containerPort: 7351
+            - name: metrics
+              containerPort: 9100
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 7350
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 7350
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: "1"
+              memory: 1Gi
+            limits:
+              cpu: "2"
+              memory: 2Gi
+          volumeMounts:
+            - name: config
+              mountPath: /nakama/config
+              readOnly: true
+            - name: modules
+              mountPath: /nakama/data/modules
+      volumes:
+        - name: config
+          configMap:
+            name: nakama-config
+        # Replace with a PVC, image volume, or init container that ships the
+        # versioned runtime module artifact matching this server release.
+        - name: modules
+          emptyDir: {}

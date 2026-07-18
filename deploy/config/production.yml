@@ -1,0 +1,44 @@
+# Nakama production configuration template.
+# Values marked "# SECRET:" must be injected at deploy time via CLI flags or a
+# secret-manager-rendered file. Never commit real credentials.
+name: nakama-prod
+data_dir: /nakama/data
+shutdown_grace_sec: 60 # Allow realtime socket connections to drain on rollout.
+
+logger:
+  level: WARN
+  stdout: true
+  format: JSON
+
+metrics:
+  reporting_freq_sec: 60
+  prometheus_port: 9100
+
+database:
+  address:
+    - nakama@postgres-production:5432/nakama # SECRET: override with --database.address including password
+
+session:
+  token_expiry_sec: 7200
+  refresh_token_expiry_sec: 86400
+  single_session: false
+  # SECRET: override --session.encryption_key and --session.refresh_encryption_key
+
+socket:
+  port: 7350
+  max_message_size_bytes: 4096
+  # TLS is terminated at the load balancer/ingress, not in Nakama.
+
+console:
+  port: 7351
+  username: admin
+  # SECRET: override --console.password and --console.signing_key
+  # Restrict access to port 7351 with a VPN or IP allowlist.
+  token_expiry_sec: 43200
+
+runtime:
+  path: /nakama/data/modules
+
+iap:
+  apple:
+    shared_password: "" # SECRET: override --iap.apple.shared_password
